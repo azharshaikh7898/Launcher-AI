@@ -1,0 +1,11 @@
+{
+  "name": "launchboard",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev:api": "npm run dev -w apps/api",
+    "build:api": "npm run build -w apps/api",
+    "test": "npm run test -w apps/api",
+    "typecheck": "npm run typecheck -w apps/api"
+  }
+}
