@@ -3,6 +3,7 @@ import type { Response } from "express";
 import { z } from "zod";
 import { db } from "../lib/db.js";
 import { env } from "../lib/env.js";
+import { AppError } from "../lib/errors.js";
 import { COOKIE, requireAuth } from "../middleware/auth.js";
 import * as auth from "../services/auth.service.js";
 
@@ -38,9 +39,10 @@ authRouter.post("/logout", (_req, res) => {
 });
 
 authRouter.get("/me", requireAuth, async (req, res) => {
-  const user = await db.user.findUniqueOrThrow({
+  const user = await db.user.findUnique({
     where: { id: req.userId! },
     include: { memberships: { include: { workspace: true } } },
   });
+  if (!user) throw new AppError(401, "Session no longer valid", "UNAUTHENTICATED");
   res.json({ data: { user: publicUser(user), workspaces: user.memberships.map((m) => ({ ...m.workspace, role: m.role })) } });
 });

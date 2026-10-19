@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 const db = new PrismaClient();
 const DAY = 864e5;
+const DONE_DAYS = [0, 0, 1, 3, 3, 3, 5]; // days ago each done task was completed
 const at = (offsetDays: number) => new Date(Date.now() + offsetDays * DAY);
 
 type Seed = [title: string, status: TaskStatus, priority: Priority, labels: string[], due: number | null, who: "demo" | "priya" | "sam" | null];
@@ -81,7 +82,7 @@ async function main() {
           dueDate: due === null ? null : at(due),
           assigneeId: who ? people[who].id : null,
           // spread completions over the last week so the weekly chart has a shape
-          completedAt: status === "DONE" ? at(-(doneIndex++ % 7)) : null,
+          completedAt: status === "DONE" ? at(-DONE_DAYS[doneIndex++ % DONE_DAYS.length]!) : null,
           description: `Details for “${title}”.`,
         },
       });
