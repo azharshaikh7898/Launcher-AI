@@ -5,21 +5,26 @@ export class ApiError extends Error {
 }
 
 type Options = Omit<RequestInit, "body"> & { json?: unknown };
+type Meta = { page: number; pageSize: number; total: number };
 
-/** Thin fetch wrapper: same-origin /api, cookies included, unwraps { data } and throws ApiError. */
-export async function api<T>(path: string, { json, headers, ...init }: Options = {}): Promise<T> {
+/** Same-origin /api, cookies included. Returns the unwrapped { data, meta } or throws ApiError. */
+export async function apiPaged<T>(path: string, { json, headers, ...init }: Options = {}): Promise<{ data: T; meta?: Meta }> {
   const res = await fetch(`/api${path}`, {
     credentials: "include",
     ...init,
     headers: { ...(json !== undefined ? { "Content-Type": "application/json" } : {}), ...headers },
     body: json !== undefined ? JSON.stringify(json) : undefined,
   });
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204) return { data: undefined as T };
   const body = (await res.json().catch(() => null)) as
-    | { data?: T; error?: { message?: string; details?: Record<string, string[]> } }
+    | { data?: T; meta?: Meta; error?: { message?: string; details?: Record<string, string[]> } }
     | null;
   if (!res.ok) throw new ApiError(res.status, body?.error?.message ?? "Request failed", body?.error?.details);
-  return body?.data as T;
+  return { data: body?.data as T, meta: body?.meta };
+}
+
+export async function api<T>(path: string, options: Options = {}): Promise<T> {
+  return (await apiPaged<T>(path, options)).data;
 }
 
 export function errorMessage(err: unknown): string {

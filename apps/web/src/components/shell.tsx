@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderKanban, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Activity, FolderKanban, LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Settings, Users } from "lucide-react";
 import { useSession } from "@/lib/session";
 import { initials } from "@/lib/types";
 import { Logo } from "./logo";
@@ -11,6 +11,9 @@ import { Logo } from "./logo";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/team", label: "Team", icon: Users },
+  { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Shell({ title, children }: { title: ReactNode; children: ReactNode }) {

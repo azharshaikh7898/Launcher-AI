@@ -7,7 +7,9 @@ import { env } from "./lib/env.js";
 import { requireAuth } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/error.js";
 import { authRouter } from "./routes/auth.js";
+import { accountRouter } from "./routes/account.js";
 import { workspacesRouter } from "./routes/workspaces.js";
+import { workspaceSettingsRouter } from "./routes/workspace-settings.js";
 import { projectsRouter } from "./routes/projects.js";
 import { tasksRouter } from "./routes/tasks.js";
 import { dashboardRouter } from "./routes/dashboard.js";
@@ -23,8 +25,9 @@ export function createApp() {
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
   app.use("/api/auth", rateLimit({ windowMs: 15 * 60_000, limit: 50, standardHeaders: true }), authRouter);
+  app.use("/api/account", requireAuth, rateLimit({ windowMs: 15 * 60_000, limit: 30, standardHeaders: true }), accountRouter);
 
-  app.use("/api/workspaces", requireAuth, workspacesRouter);
+  app.use("/api/workspaces", requireAuth, workspacesRouter, workspaceSettingsRouter);
   const ws = "/api/workspaces/:workspaceId";
   app.use(`${ws}/projects`, requireAuth, projectsRouter);
   app.use(`${ws}/tasks`, requireAuth, tasksRouter);
