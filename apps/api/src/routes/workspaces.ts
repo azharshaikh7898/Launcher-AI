@@ -37,12 +37,12 @@ workspacesRouter.post("/:workspaceId/members", requireMember("ADMIN"), async (re
 
 workspacesRouter.delete("/:workspaceId/members/:userId", requireMember("ADMIN"), async (req, res) => {
   const target = await db.workspaceMember.findUnique({
-    where: { userId_workspaceId: { userId: req.params.userId, workspaceId: req.workspaceId! } },
+    where: { userId_workspaceId: { userId: String(req.params.userId), workspaceId: req.workspaceId! } },
   });
   if (!target) throw notFound("Member");
   if (target.role === "OWNER") throw new AppError(403, "The workspace owner cannot be removed", "FORBIDDEN");
   await db.workspaceMember.delete({ where: { id: target.id } });
-  await logActivity(req.workspaceId!, req.userId!, "removed member", "member", req.params.userId);
+  await logActivity(req.workspaceId!, req.userId!, "removed member", "member", String(req.params.userId));
   res.status(204).end();
 });
 

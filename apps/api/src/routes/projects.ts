@@ -54,23 +54,23 @@ projectsRouter.post("/", async (req, res) => {
 });
 
 projectsRouter.get("/:id", async (req, res) => {
-  const project = await db.project.findFirst({ where: { id: req.params.id, workspaceId: req.workspaceId! } });
+  const project = await db.project.findFirst({ where: { id: String(req.params.id), workspaceId: req.workspaceId! } });
   if (!project) throw notFound("Project");
   res.json({ data: project });
 });
 
 projectsRouter.patch("/:id", async (req, res) => {
   const data = body.partial().parse(req.body);
-  const { count } = await db.project.updateMany({ where: { id: req.params.id, workspaceId: req.workspaceId! }, data });
+  const { count } = await db.project.updateMany({ where: { id: String(req.params.id), workspaceId: req.workspaceId! }, data });
   if (!count) throw notFound("Project");
-  await logActivity(req.workspaceId!, req.userId!, "updated", "project", req.params.id, data);
-  res.json({ data: await db.project.findUnique({ where: { id: req.params.id } }) });
+  await logActivity(req.workspaceId!, req.userId!, "updated", "project", String(req.params.id), data);
+  res.json({ data: await db.project.findUnique({ where: { id: String(req.params.id) } }) });
 });
 
 // Only Owners/Admins may delete. Tasks and comments go with it via onDelete: Cascade.
 projectsRouter.delete("/:id", requireMember("ADMIN"), async (req, res) => {
-  const { count } = await db.project.deleteMany({ where: { id: req.params.id, workspaceId: req.workspaceId! } });
+  const { count } = await db.project.deleteMany({ where: { id: String(req.params.id), workspaceId: req.workspaceId! } });
   if (!count) throw notFound("Project");
-  await logActivity(req.workspaceId!, req.userId!, "deleted", "project", req.params.id);
+  await logActivity(req.workspaceId!, req.userId!, "deleted", "project", String(req.params.id));
   res.status(204).end();
 });

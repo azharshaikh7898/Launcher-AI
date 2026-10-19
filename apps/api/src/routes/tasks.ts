@@ -64,25 +64,25 @@ tasksRouter.patch("/:id", async (req, res) => {
   const input = update.parse(req.body);
   await assertAssignee(req.workspaceId!, input.assigneeId);
   const { count } = await db.task.updateMany({
-    where: { id: req.params.id, ...scoped(req.workspaceId!) },
+    where: { id: String(req.params.id), ...scoped(req.workspaceId!) },
     data: { ...input, ...completion(input.status) },
   });
   if (!count) throw notFound("Task");
-  await logActivity(req.workspaceId!, req.userId!, input.status ? "moved" : "updated", "task", req.params.id, input);
-  res.json({ data: await db.task.findUnique({ where: { id: req.params.id } }) });
+  await logActivity(req.workspaceId!, req.userId!, input.status ? "moved" : "updated", "task", String(req.params.id), input);
+  res.json({ data: await db.task.findUnique({ where: { id: String(req.params.id) } }) });
 });
 
 tasksRouter.delete("/:id", async (req, res) => {
-  const { count } = await db.task.deleteMany({ where: { id: req.params.id, ...scoped(req.workspaceId!) } });
+  const { count } = await db.task.deleteMany({ where: { id: String(req.params.id), ...scoped(req.workspaceId!) } });
   if (!count) throw notFound("Task");
-  await logActivity(req.workspaceId!, req.userId!, "deleted", "task", req.params.id);
+  await logActivity(req.workspaceId!, req.userId!, "deleted", "task", String(req.params.id));
   res.status(204).end();
 });
 
 tasksRouter.get("/:id/comments", async (req, res) => {
-  await findTask(req.workspaceId!, req.params.id);
+  await findTask(req.workspaceId!, String(req.params.id));
   const data = await db.comment.findMany({
-    where: { taskId: req.params.id }, orderBy: { createdAt: "asc" },
+    where: { taskId: String(req.params.id) }, orderBy: { createdAt: "asc" },
     include: { author: { select: { id: true, name: true } } },
   });
   res.json({ data });
@@ -90,11 +90,11 @@ tasksRouter.get("/:id/comments", async (req, res) => {
 
 tasksRouter.post("/:id/comments", async (req, res) => {
   const { body } = z.object({ body: z.string().trim().min(1).max(2000) }).parse(req.body);
-  await findTask(req.workspaceId!, req.params.id);
+  await findTask(req.workspaceId!, String(req.params.id));
   const comment = await db.comment.create({
-    data: { body, taskId: req.params.id, authorId: req.userId! },
+    data: { body, taskId: String(req.params.id), authorId: req.userId! },
     include: { author: { select: { id: true, name: true } } },
   });
-  await logActivity(req.workspaceId!, req.userId!, "commented", "task", req.params.id);
+  await logActivity(req.workspaceId!, req.userId!, "commented", "task", String(req.params.id));
   res.status(201).json({ data: comment });
 });
