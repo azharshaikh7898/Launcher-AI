@@ -15,7 +15,7 @@ export function AuthShell({ title, subtitle, children, footer }: { title: string
             ))}
           </ul>
         </div>
-        <p className="text-xs text-slate-500">Built with Next.js, Express, Prisma and PostgreSQL</p>
+        <p className="text-xs text-slate-500">Built with Next.js, Express, Prisma and PostgreSQL · Made by <a href="https://github.com/azharshaikh7898" target="_blank" rel="noopener noreferrer" className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300">Azhar</a></p>
       </aside>
       <main className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
