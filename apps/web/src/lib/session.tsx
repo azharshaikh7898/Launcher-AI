@@ -19,6 +19,11 @@ export function useSession() {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [data, setData] = useState<{ user: User; workspaces: Workspace[] } | null>(null);
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
 
   // Also called after profile/workspace edits so the sidebar and header update at once.
   const refresh = useCallback(async () => {
@@ -32,7 +37,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void refresh(); }, [refresh]);
 
   if (!data || !data.workspaces[0]) {
-    return <div className="grid min-h-screen place-items-center text-sm text-slate-500">Loading your workspace…</div>;
+    return (
+      <div className="grid min-h-screen place-items-center px-6 text-center text-sm text-slate-500">
+        <div>
+          <p>Loading your workspace…</p>
+          {slow && <p className="mt-2 max-w-xs text-xs text-slate-400">The free demo server is waking up after a quiet spell. This can take up to a minute.</p>}
+        </div>
+      </div>
+    );
   }
 
   const logout = async () => {
